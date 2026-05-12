@@ -1,0 +1,609 @@
+# Mutual-Translation
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="閩南語翻譯" />
+  <meta name="theme-color" content="#0d1b2a" />
+  <title>閩 閩南語 ⇄ 中文翻譯</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='26' fill='%230d1b2a'/%3E%3Ctext x='60' y='88' font-family='serif' font-size='76' font-weight='bold' text-anchor='middle' fill='%23e63950'%3E閩%3C/text%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0d1b2a;
+      --bg2:       #112233;
+      --card:      #162840;
+      --card2:     #1c3250;
+      --border:    rgba(255,255,255,0.08);
+      --red:       #e63950;
+      --red-dark:  #c0303f;
+      --red-glow:  rgba(230,57,80,0.35);
+      --gold:      #f5a623;
+      --teal:      #2ec4b6;
+      --teal-dim:  rgba(46,196,182,0.15);
+      --text:      #e8f0fe;
+      --text-dim:  #7a95b0;
+      --text-muted:#4a6070;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-red:0 6px 24px rgba(230,57,80,0.4);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    body::before {
+      content:'';
+      position:fixed; inset:0; z-index:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(230,57,80,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 10% 90%,  rgba(46,196,182,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 90% 60%,  rgba(245,166,35,0.05) 0%, transparent 60%);
+      pointer-events:none;
+    }
+
+    /* ── Wrapper ── */
+    .wrapper {
+      width:100%; max-width:480px; min-height:100dvh;
+      display:flex; flex-direction:column;
+      position:relative; z-index:1;
+      padding-bottom:36px;
+    }
+
+    /* ── Header ── */
+    header {
+      display:flex; flex-direction:column; align-items:center;
+      padding:36px 20px 20px; gap:10px;
+    }
+    .logo-badge {
+      width:76px; height:76px; border-radius:20px;
+      background:linear-gradient(145deg,#1a2e44,#0d1b2a);
+      border:2px solid rgba(230,57,80,0.55);
+      box-shadow:0 0 0 4px rgba(230,57,80,0.1), 0 8px 32px rgba(0,0,0,0.45);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
+      animation:logo-float 5s ease-in-out infinite;
+    }
+    .logo-badge::before {
+      content:'';
+      position:absolute; inset:0;
+      background:radial-gradient(circle at 40% 35%, rgba(230,57,80,0.18), transparent 65%);
+    }
+    @keyframes logo-float {
+      0%,100%{ transform:translateY(0) rotate(0deg); }
+      33%    { transform:translateY(-5px) rotate(0.5deg); }
+      66%    { transform:translateY(-2px) rotate(-0.5deg); }
+    }
+    .logo-badge svg { width:58px; height:58px; position:relative; z-index:1; }
+
+    header h1 {
+      font-family:'Noto Serif TC',serif;
+      font-size:20px; font-weight:700; letter-spacing:0.06em; color:var(--text);
+    }
+    header .subtitle { font-size:12px; color:var(--text-dim); letter-spacing:0.12em; }
+
+    /* ── Direction button ── */
+    .dir-btn {
+      display:flex; align-items:center; justify-content:space-between;
+      margin:0 16px 14px;
+      background:linear-gradient(135deg,#7b1c2a,#a82030,#c63040);
+      border:none; border-radius:var(--radius-lg);
+      padding:16px 20px; cursor:pointer;
+      box-shadow:var(--shadow-red);
+      transition:transform .15s, box-shadow .15s;
+      position:relative; overflow:hidden;
+    }
+    .dir-btn::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 50%);
+      pointer-events:none;
+    }
+    .dir-btn:active { transform:scale(0.975); box-shadow:0 3px 12px var(--red-glow); }
+    .dir-langs { display:flex; align-items:center; gap:10px; }
+    .dir-lang  { font-family:'Noto Serif TC',serif; font-size:18px; font-weight:700; color:#fff; letter-spacing:0.04em; }
+    .dir-arrow {
+      font-size:18px; color:rgba(255,255,255,0.75);
+      transition:transform .45s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .dir-btn.flipped .dir-arrow { transform:rotate(180deg); }
+    .dir-hint { font-size:11px; color:rgba(255,255,255,0.55); letter-spacing:0.08em; }
+
+    /* ── Mic button ── */
+    .mic-btn {
+      display:flex; align-items:center; gap:14px;
+      margin:0 16px 14px;
+      background:var(--card); border:1.5px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:16px 18px; cursor:pointer;
+      transition:border-color .2s, background .2s, transform .15s;
+    }
+    .mic-btn:active { transform:scale(0.98); }
+    .mic-btn.recording {
+      border-color:var(--red);
+      background:rgba(230,57,80,0.08);
+      animation:mic-border-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes mic-border-pulse {
+      0%,100%{ box-shadow:0 0 0 0 rgba(230,57,80,0.3); }
+      50%    { box-shadow:0 0 0 8px rgba(230,57,80,0); }
+    }
+    .mic-circle {
+      width:50px; height:50px; border-radius:50%;
+      background:linear-gradient(145deg,var(--red),#ff6070);
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; flex-shrink:0;
+      box-shadow:0 4px 16px var(--red-glow);
+    }
+    .mic-btn.recording .mic-circle {
+      animation:mic-bounce .9s ease-in-out infinite;
+      background:linear-gradient(145deg,#ff3355,#ff6070);
+    }
+    @keyframes mic-bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    .mic-info { flex:1; text-align:left; }
+    .mic-title { font-size:15px; font-weight:500; color:var(--text); }
+    .mic-sub   { font-size:12px; color:var(--text-dim); margin-top:2px; }
+    .mic-btn.recording .mic-title { color:var(--red); }
+    .wave { display:flex; align-items:center; gap:3px; height:26px; }
+    .wave span {
+      display:block; width:4px; border-radius:2px;
+      background:var(--red); height:6px; opacity:0; transition:opacity .2s;
+    }
+    .mic-btn.recording .wave span { opacity:1; animation:wave-dance .9s ease-in-out infinite; }
+    .wave span:nth-child(1){animation-delay:0s}
+    .wave span:nth-child(2){animation-delay:.15s}
+    .wave span:nth-child(3){animation-delay:.3s}
+    .wave span:nth-child(4){animation-delay:.15s}
+    .wave span:nth-child(5){animation-delay:0s}
+    @keyframes wave-dance { 0%,100%{height:5px} 50%{height:22px} }
+
+    /* ── Text panel ── */
+    .panel {
+      margin:0 16px 14px;
+      background:var(--card); border:1.5px solid var(--border);
+      border-radius:var(--radius-lg); overflow:hidden;
+      transition:border-color .2s;
+    }
+    .panel:focus-within { border-color:rgba(46,196,182,0.4); }
+    .panel-head {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 16px 8px; border-bottom:1px solid var(--border);
+    }
+    .lang-tag {
+      display:flex; align-items:center; gap:6px;
+      font-size:12px; font-weight:500; color:var(--text-dim); letter-spacing:0.1em;
+    }
+    .lang-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal); }
+    .lang-dot.red { background:var(--red); box-shadow:0 0 8px var(--red); }
+    .char-count { font-size:11px; color:var(--text-muted); }
+    textarea {
+      width:100%; background:transparent; border:none; outline:none;
+      color:var(--text); font-family:'Noto Sans TC',sans-serif;
+      font-size:17px; line-height:1.65;
+      padding:13px 16px 14px; resize:none; min-height:108px;
+    }
+    textarea::placeholder { color:var(--text-muted); }
+
+    /* ── Controls ── */
+    .controls { display:flex; gap:12px; margin:2px 16px 14px; }
+    .btn-clear {
+      flex:1; background:var(--card); border:1.5px solid var(--border);
+      border-radius:var(--radius-lg); padding:17px;
+      color:var(--text-dim); font-size:15px;
+      font-family:'Noto Sans TC',sans-serif; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:7px;
+      transition:all .15s;
+    }
+    .btn-clear:active { background:rgba(230,57,80,0.1); border-color:rgba(230,57,80,0.35); color:var(--red); }
+    .btn-translate {
+      flex:2.2; background:linear-gradient(135deg,var(--red-dark),var(--red));
+      border:none; border-radius:var(--radius-lg); padding:17px;
+      color:#fff; font-size:16px; font-weight:700;
+      font-family:'Noto Sans TC',sans-serif; cursor:pointer;
+      box-shadow:var(--shadow-red);
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      transition:transform .15s, box-shadow .15s, opacity .15s;
+    }
+    .btn-translate:active    { transform:scale(0.97); box-shadow:0 3px 10px var(--red-glow); }
+    .btn-translate.loading   { opacity:.6; pointer-events:none; }
+    .spinner {
+      width:18px; height:18px;
+      border:2.5px solid rgba(255,255,255,0.25);
+      border-top-color:#fff; border-radius:50%;
+      animation:spin .65s linear infinite; display:none;
+    }
+    .btn-translate.loading .spinner { display:block; }
+    .btn-translate.loading .btn-label { display:none; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ── Result panel ── */
+    .result-panel {
+      margin:0 16px 14px;
+      background:var(--card); border:1.5px solid var(--border);
+      border-radius:var(--radius-lg); overflow:hidden;
+    }
+    .result-body {
+      min-height:90px; padding:14px 16px;
+      font-family:'Noto Serif TC',serif;
+      font-size:18px; line-height:1.75;
+      color:var(--text); word-break:break-all;
+    }
+    .result-body.empty {
+      font-family:'Noto Sans TC',sans-serif;
+      font-size:14px; color:var(--text-muted);
+    }
+    .cursor {
+      display:inline-block; width:2px; height:1em;
+      background:var(--teal); margin-left:2px;
+      vertical-align:text-bottom;
+      animation:blink .9s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .speak-row { display:flex; gap:10px; padding:8px 12px 14px; }
+    .speak-btn, .copy-btn {
+      border:1.5px solid var(--border); border-radius:var(--radius-sm);
+      padding:9px 16px; cursor:pointer;
+      font-family:'Noto Sans TC',sans-serif; font-size:13px;
+      color:var(--text-dim); background:var(--card2);
+      display:flex; align-items:center; gap:6px; transition:all .15s;
+    }
+    .speak-btn { flex:2; }
+    .copy-btn  { flex:1; }
+    .speak-btn:active, .copy-btn:active {
+      transform:scale(0.96);
+      background:var(--teal-dim); border-color:var(--teal); color:var(--teal);
+    }
+    .speak-btn.speaking { border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+
+    /* ── Footer ── */
+    .footer-hint {
+      margin:0 16px;
+      background:rgba(245,166,35,0.07);
+      border:1px solid rgba(245,166,35,0.2);
+      border-radius:var(--radius-md);
+      padding:12px 15px; font-size:12px;
+      color:var(--text-muted); line-height:1.7;
+    }
+    .footer-hint strong { color:var(--gold); font-weight:500; }
+
+    /* ── Toast ── */
+    #toast {
+      position:fixed; bottom:36px; left:50%;
+      transform:translateX(-50%) translateY(60px);
+      background:rgba(12,24,40,0.94);
+      border:1px solid var(--border); border-radius:50px;
+      padding:10px 24px; font-size:13px; color:var(--text);
+      backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+      transition:transform .35s cubic-bezier(0.34,1.56,0.64,1), opacity .3s;
+      opacity:0; z-index:999; white-space:nowrap;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    }
+    #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+  </style>
+
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+
+  <header>
+    <div class="logo-badge">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#ff7080"/>
+            <stop offset="50%"  stop-color="#e63950"/>
+            <stop offset="100%" stop-color="#c0303f"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(230,57,80,0.35)" stroke-width="1.5"/>
+        <text x="50" y="73"
+          font-family="'Noto Serif TC', serif"
+          font-size="66" font-weight="900"
+          text-anchor="middle" fill="url(#g1)">閩</text>
+      </svg>
+    </div>
+    <h1>閩南語 ⇄ 中文翻譯</h1>
+    <p class="subtitle">閩南語 ⇄ 中文</p>
+  </header>
+
+  <!-- DIRECTION TOGGLE -->
+
+  <button class="dir-btn" id="dirBtn" onclick="toggleDir()">
+    <div class="dir-langs">
+      <span class="dir-lang" id="srcLang">閩南語</span>
+      <span class="dir-arrow" id="dirArrow">⇄</span>
+      <span class="dir-lang" id="tgtLang">中文</span>
+    </div>
+    <span class="dir-hint">點擊切換翻譯方向</span>
+  </button>
+
+  <!-- MIC -->
+
+  <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+    <div class="mic-circle">🎤</div>
+    <div class="mic-info">
+      <div class="mic-title" id="micTitle">點擊說話</div>
+      <div class="mic-sub"   id="micSub">閩南語　0 / 500</div>
+    </div>
+    <div class="wave">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </button>
+
+  <!-- INPUT -->
+
+  <div class="panel">
+    <div class="panel-head">
+      <span class="lang-tag"><span class="lang-dot red"></span><span id="inputLangLabel">閩南語</span></span>
+      <span class="char-count" id="charCount">0 / 500</span>
+    </div>
+    <textarea id="inputText" maxlength="500"
+      placeholder="輸入閩南語文字或點上方麥克風說話…"
+      oninput="onInput()" rows="4"></textarea>
+  </div>
+
+  <!-- CONTROLS -->
+
+  <div class="controls">
+    <button class="btn-clear" onclick="doClear()">🗑 清除</button>
+    <button class="btn-translate" id="transBtn" onclick="doTranslate()">
+      <span class="btn-label">翻譯</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+  <!-- RESULT -->
+
+  <div class="result-panel">
+    <div class="panel-head">
+      <span class="lang-tag"><span class="lang-dot"></span><span id="outputLangLabel">中文</span></span>
+    </div>
+    <div class="result-body empty" id="resultBody">翻譯結果會顯示在這裡</div>
+    <div class="speak-row" id="speakRow" style="display:none">
+      <button class="speak-btn" id="speakBtn" onclick="doSpeak()">🔊 朗讀翻譯</button>
+      <button class="copy-btn"               onclick="doCopy()">📋 複製</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+
+  <div class="footer-hint">
+    💡 <strong>加入主畫面：</strong>在 Safari 點選「分享」→「加入主畫面」，即可像 App 一樣使用
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ── State ── */
+let mode       = 'hoklo2zh';
+let srInstance = null;
+let isRec      = false;
+let lastResult = '';
+let isSpeaking = false;
+
+/* ── Direction ── */
+function toggleDir() {
+  mode = mode === 'hoklo2zh' ? 'zh2hoklo' : 'hoklo2zh';
+  const src = mode === 'hoklo2zh' ? '閩南語' : '中文';
+  const tgt = mode === 'hoklo2zh' ? '中文'   : '閩南語';
+  document.getElementById('srcLang').textContent        = src;
+  document.getElementById('tgtLang').textContent        = tgt;
+  document.getElementById('inputLangLabel').textContent  = src;
+  document.getElementById('outputLangLabel').textContent = tgt;
+  document.getElementById('micSub').textContent         = src + '　0 / 500';
+  document.getElementById('inputText').placeholder      = '輸入' + src + '文字或點上方麥克風說話…';
+  document.getElementById('dirBtn').classList.toggle('flipped');
+  clearResult();
+  onInput();
+}
+
+/* ── Input ── */
+function onInput() {
+  const len = document.getElementById('inputText').value.length;
+  document.getElementById('charCount').textContent = len + ' / 500';
+  const src = mode === 'hoklo2zh' ? '閩南語' : '中文';
+  document.getElementById('micSub').textContent = src + '　' + len + ' / 500';
+}
+
+/* ── Mic ── */
+function toggleMic() {
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    showToast('⚠️ 請使用 Chrome 或 Safari 以啟用語音辨識');
+    return;
+  }
+  isRec ? stopMic() : startMic();
+}
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  srInstance = new SR();
+  srInstance.lang           = 'zh-TW';
+  srInstance.continuous     = false;
+  srInstance.interimResults = true;
+  srInstance.onstart  = () => {
+    isRec = true;
+    document.getElementById('micBtn').classList.add('recording');
+    document.getElementById('micTitle').textContent = '錄音中，請說話…';
+  };
+  srInstance.onresult = (e) => {
+    let t = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    document.getElementById('inputText').value = t;
+    onInput();
+  };
+  srInstance.onerror = () => stopMic();
+  srInstance.onend   = () => stopMic();
+  try { srInstance.start(); } catch(err) { stopMic(); }
+}
+function stopMic() {
+  isRec = false;
+  if (srInstance) { try { srInstance.stop(); } catch(e){} }
+  document.getElementById('micBtn').classList.remove('recording');
+  document.getElementById('micTitle').textContent = '點擊說話';
+}
+
+/* ── Translate ── */
+async function doTranslate() {
+  const text = document.getElementById('inputText').value.trim();
+  if (!text) { showToast('請先輸入或說出文字'); return; }
+
+  const btn = document.getElementById('transBtn');
+  btn.classList.add('loading');
+  clearResult(true);
+
+  const sys = mode === 'hoklo2zh'
+    ? `你是專業的閩南語（台語）翻譯專家。
+請將使用者輸入的閩南語（台語）翻譯成自然流暢的繁體中文。
+閩南語可能以漢字或白話字（POJ 羅馬拼音）書寫。
+只輸出翻譯結果，不加任何說明或標點以外的額外文字。`
+    : `你是專業的閩南語（台語）翻譯專家。
+請將使用者輸入的繁體中文翻譯成道地的閩南語（台語），以漢字書寫。
+若有助理解，可在括號內附加白話字（POJ）拼音。
+只輸出翻譯結果，不加任何說明或標點以外的額外文字。`;
+
+  try {
+    const res  = await fetch('https://api.anthropic.com/v1/messages', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system:     sys,
+        messages:   [{ role: 'user', content: text }]
+      })
+    });
+    const data = await res.json();
+    if (data.content?.[0]?.text) {
+      lastResult = data.content[0].text.trim();
+      showResult(lastResult);
+    } else {
+      showResultErr('翻譯失敗，請稍後再試');
+    }
+  } catch(err) {
+    showResultErr('網路錯誤，請檢查連線狀態');
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+/* typewriter reveal */
+function showResult(text) {
+  const el = document.getElementById('resultBody');
+  el.className = 'result-body';
+  el.textContent = '';
+  let i = 0;
+  const cur = document.createElement('span');
+  cur.className = 'cursor';
+  el.appendChild(cur);
+  const tick = () => {
+    if (i < text.length) {
+      el.insertBefore(document.createTextNode(text[i++]), cur);
+      setTimeout(tick, 28);
+    } else {
+      cur.remove();
+      document.getElementById('speakRow').style.display = 'flex';
+    }
+  };
+  tick();
+}
+function showResultErr(msg) {
+  const el = document.getElementById('resultBody');
+  el.className = 'result-body empty';
+  el.textContent = '⚠️ ' + msg;
+}
+function clearResult() {
+  lastResult = '';
+  const el = document.getElementById('resultBody');
+  el.className = 'result-body empty';
+  el.textContent = '翻譯結果會顯示在這裡';
+  document.getElementById('speakRow').style.display = 'none';
+}
+
+/* ── Clear all ── */
+function doClear() {
+  document.getElementById('inputText').value = '';
+  onInput();
+  clearResult();
+  showToast('✓ 已清除');
+}
+
+/* ── Speak ── */
+function doSpeak() {
+  if (!lastResult || !('speechSynthesis' in window)) {
+    showToast('⚠️ 瀏覽器不支援語音播放'); return;
+  }
+  if (isSpeaking) {
+    window.speechSynthesis.cancel(); return;
+  }
+  const utter = new SpeechSynthesisUtterance(lastResult);
+  utter.lang  = 'zh-TW';
+  utter.rate  = 0.92;
+  utter.onstart = () => {
+    isSpeaking = true;
+    document.getElementById('speakBtn').classList.add('speaking');
+    document.getElementById('speakBtn').textContent = '⏹ 停止朗讀';
+  };
+  utter.onend = utter.onerror = () => {
+    isSpeaking = false;
+    document.getElementById('speakBtn').classList.remove('speaking');
+    document.getElementById('speakBtn').textContent = '🔊 朗讀翻譯';
+  };
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+/* ── Copy ── */
+function doCopy() {
+  if (!lastResult) return;
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(lastResult).then(() => showToast('✓ 已複製到剪貼板'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = lastResult;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast('✓ 已複製到剪貼板');
+  }
+}
+
+/* ── Toast ── */
+let tTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(tTimer);
+  tTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ── Enter key ── */
+document.getElementById('inputText').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doTranslate(); }
+});
+</script>
+
+</body>
+</html>
